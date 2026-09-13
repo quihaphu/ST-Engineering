@@ -1,0 +1,23 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vs/
+.idea/
+*.user
+*.suo
+
+# .NET
+**/bin/
+**/obj/
+**/TestResults/
+*.DotSettings.user
+
+# Node
+**/node_modules/
+**/dist/
+
+# Env / secrets (keep example defaults in compose)
+.env.local
+
+# Nested empty stub (ignore if present)
+source/

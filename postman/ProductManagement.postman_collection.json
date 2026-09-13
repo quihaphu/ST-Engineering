@@ -1,0 +1,219 @@
+{
+  "info": {
+    "name": "Product Management MVP",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "rowVersion",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Lookups",
+      "item": [
+        {
+          "name": "Get Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/categories"
+          }
+        },
+        {
+          "name": "Get Attribute Definitions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/attribute-definitions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?page=1&pageSize=10&search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" },
+                { "key": "search", "value": "" },
+                { "key": "categoryId", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('productId', body.id);",
+                  "  pm.collectionVariables.set('rowVersion', body.rowVersion);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Classic Tee\",\n  \"description\": \"Cotton t-shirt\",\n  \"categoryId\": \"11111111-1111-1111-1111-111111111111\",\n  \"variants\": [\n    {\n      \"sku\": \"TEE-BLU-M\",\n      \"size\": \"M\",\n      \"color\": \"Blue\",\n      \"price\": 19.99,\n      \"stockQuantity\": 25\n    }\n  ],\n  \"attributes\": [\n    {\n      \"attributeDefinitionId\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n      \"value\": \"Cotton\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/products"
+          }
+        },
+        {
+          "name": "Get Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('rowVersion', body.rowVersion);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          }
+        },
+        {
+          "name": "Update Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('rowVersion', body.rowVersion);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Classic Tee Updated\",\n  \"description\": \"Cotton t-shirt\",\n  \"categoryId\": \"11111111-1111-1111-1111-111111111111\",\n  \"rowVersion\": \"{{rowVersion}}\",\n  \"variants\": [\n    {\n      \"sku\": \"TEE-BLU-M\",\n      \"size\": \"M\",\n      \"color\": \"Blue\",\n      \"price\": 21.99,\n      \"stockQuantity\": 20\n    }\n  ],\n  \"attributes\": [\n    {\n      \"attributeDefinitionId\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n      \"value\": \"Organic Cotton\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Validation and conflicts",
+      "item": [
+        {
+          "name": "Create invalid product (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"description\": null,\n  \"categoryId\": \"11111111-1111-1111-1111-111111111111\",\n  \"variants\": [\n    {\n      \"sku\": \"INVALID\",\n      \"size\": \"M\",\n      \"color\": \"Blue\",\n      \"price\": 10,\n      \"stockQuantity\": 1\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/products"
+          }
+        },
+        {
+          "name": "Create negative price (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bad price\",\n  \"categoryId\": \"11111111-1111-1111-1111-111111111111\",\n  \"variants\": [\n    {\n      \"sku\": \"NEG-PRICE\",\n      \"size\": \"M\",\n      \"color\": \"Blue\",\n      \"price\": -1,\n      \"stockQuantity\": 1\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/products"
+          }
+        },
+        {
+          "name": "Create negative stock (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bad stock\",\n  \"categoryId\": \"11111111-1111-1111-1111-111111111111\",\n  \"variants\": [\n    {\n      \"sku\": \"NEG-STOCK\",\n      \"size\": \"M\",\n      \"color\": \"Blue\",\n      \"price\": 10,\n      \"stockQuantity\": -5\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/products"
+          }
+        },
+        {
+          "name": "Create duplicate SKU (409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Duplicate SKU\",\n  \"categoryId\": \"11111111-1111-1111-1111-111111111111\",\n  \"variants\": [\n    {\n      \"sku\": \"TEE-BLU-M\",\n      \"size\": \"S\",\n      \"color\": \"Black\",\n      \"price\": 9,\n      \"stockQuantity\": 1\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/products"
+          }
+        },
+        {
+          "name": "Get missing product (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/00000000-0000-0000-0000-000000000099"
+          }
+        },
+        {
+          "name": "Update stale RowVersion (409)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Stale client\",\n  \"description\": \"Should conflict\",\n  \"categoryId\": \"11111111-1111-1111-1111-111111111111\",\n  \"rowVersion\": \"AAAAAAAAAAA=\",\n  \"variants\": [\n    {\n      \"sku\": \"TEE-BLU-M\",\n      \"size\": \"M\",\n      \"color\": \"Blue\",\n      \"price\": 21.99,\n      \"stockQuantity\": 99\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          }
+        }
+      ]
+    }
+  ]
+}
